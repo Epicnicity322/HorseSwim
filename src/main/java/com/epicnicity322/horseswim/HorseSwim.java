@@ -16,9 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.epicnicity322.horseswim.listener;
+package com.epicnicity322.horseswim;
 
-import com.epicnicity322.horseswim.SwimListener;
+import com.epicnicity322.horseswim.listener.SwimListener;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class HorseSwim extends JavaPlugin {

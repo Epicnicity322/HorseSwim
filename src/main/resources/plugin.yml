@@ -1,6 +1,6 @@
 api-version: '1.13'
 author: 'Epicnicity322'
 description: 'Allows rideable entities to swim.'
-main: com.epicnicity322.horseswim.listeners.HorseSwim
+main: com.epicnicity322.horseswim.HorseSwim
 name: 'HorseSwim'
 version: '${project.version}'

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.epicnicity322.horseswim;
+package com.epicnicity322.horseswim.listener;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
