@@ -19,35 +19,18 @@
 package com.epicnicity322.horseswim.listener;
 
 import com.epicnicity322.horseswim.util.HorseSwimUtil;
-import org.bukkit.Location;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerMoveEvent;
+import org.spigotmc.event.entity.EntityDismountEvent;
 
-public final class SwimListener implements Listener {
-    private boolean preventAutoForHorses = false;
-
-    public void setPreventAutoForHorses(boolean preventAutoForHorses) {
-        this.preventAutoForHorses = preventAutoForHorses;
-    }
-
+public final class DismountListener implements Listener {
     @EventHandler
-    public void onPlayerMove(PlayerMoveEvent event) {
-        Location from = event.getFrom();
-        Location to = event.getTo();
-
-        if (to != null && from.getBlockY() != to.getBlockY()) {
-            Player player = event.getPlayer();
-            Entity vehicle = player.getVehicle();
-
-            if (vehicle != null) {
-                if (preventAutoForHorses && vehicle.getType() == EntityType.HORSE) return;
-                if (HorseSwimUtil.inWater(player) && HorseSwimUtil.inWater(vehicle)) {
-                    vehicle.setVelocity(vehicle.getVelocity().setY(0.15));
-                }
+    public void onEntityDismount(EntityDismountEvent event) {
+        if (event.getEntity() instanceof Player) {
+            Player player = (Player) event.getEntity();
+            if (!player.isSneaking() && HorseSwimUtil.inWater(player)) {
+                event.setCancelled(true);
             }
         }
     }

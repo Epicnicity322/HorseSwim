@@ -18,12 +18,108 @@
 
 package com.epicnicity322.horseswim;
 
+import com.epicnicity322.epicpluginlib.bukkit.logger.Logger;
+import com.epicnicity322.epicpluginlib.core.config.ConfigurationHolder;
+import com.epicnicity322.epicpluginlib.core.config.ConfigurationLoader;
+import com.epicnicity322.horseswim.command.HorseReloadCommand;
+import com.epicnicity322.horseswim.listener.DismountListener;
+import com.epicnicity322.horseswim.listener.HorseJumpListener;
 import com.epicnicity322.horseswim.listener.SwimListener;
+import com.epicnicity322.yamlhandler.Configuration;
+import org.bukkit.command.PluginCommand;
+import org.bukkit.event.Cancellable;
+import org.bukkit.event.HandlerList;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.spigotmc.event.entity.EntityDismountEvent;
+
+import java.nio.file.Paths;
+import java.util.Map;
 
 public final class HorseSwim extends JavaPlugin {
+    private static final @NotNull ConfigurationHolder config = new ConfigurationHolder(Paths.get("plugins", "HorseSwim"),
+            "# Swim modes: AUTO and MANUAL. MANUAL works only for horses, all other animals swim in AUTO.\n" +
+                    "Swim Mode: AUTO\n" +
+                    "\n" +
+                    "# Prevents the player from being dismounted automatically when they are under water.\n" +
+                    "# Players can still crouch to dismount underwater, this only prevents the vanilla dismount behavior.\n" +
+                    "# Works only in recent versions.\n" +
+                    "Prevent Auto Underwater Dismount: true\n" +
+                    "\n" +
+                    "# In manual mode, horses jump force in water is: Power of the jump * Horse max jump strength * This multiplier.\n" +
+                    "Manual Swim Jump Multiplier: 1.4");
+    private static final @NotNull ConfigurationLoader loader = new ConfigurationLoader();
+    private static final @NotNull Logger logger = new Logger("[HorseSwim] ");
+    private static final boolean isEntityMountEventCancellable = Cancellable.class.isAssignableFrom(EntityDismountEvent.class);
+    private static @Nullable HorseSwim instance;
+
+    static {
+        loader.registerConfiguration(config);
+    }
+
+    private final @NotNull HorseJumpListener horseJumpListener = new HorseJumpListener();
+    private final @NotNull DismountListener dismountListener = new DismountListener();
+    private final @NotNull SwimListener swimListener = new SwimListener();
+    public HorseSwim() {
+        instance = this;
+        logger.setLogger(getLogger());
+    }
+
+    /**
+     * Reloads configurations and listeners of HorseSwim.
+     *
+     * @return Whether configuration was loaded successfully.
+     */
+    public static boolean reload() {
+        if (instance == null) return false;
+
+        Map<ConfigurationHolder, Exception> exceptions = loader.loadConfigurations();
+
+        if (!exceptions.isEmpty()) {
+            logger.log("Failed to load config! Is the YAML Syntax valid?");
+            exceptions.forEach((c, e) -> e.printStackTrace());
+        }
+
+        instance.loadListeners();
+        return exceptions.isEmpty();
+    }
+
     @Override
     public void onEnable() {
-        getServer().getPluginManager().registerEvents(new SwimListener(), this);
+        logger.setLogger(getLogger());
+        reload();
+
+        PluginCommand horseReload = getCommand("horsereload");
+
+        if (horseReload != null) {
+            horseReload.setExecutor(new HorseReloadCommand());
+        }
+    }
+
+    private void loadListeners() {
+        PluginManager pm = getServer().getPluginManager();
+        Configuration config = HorseSwim.config.getConfiguration();
+
+        if (config.getBoolean("Prevent Auto Underwater Dismount").orElse(false)
+                && isEntityMountEventCancellable) {
+            pm.registerEvents(dismountListener, this);
+        } else {
+            HandlerList.unregisterAll(dismountListener);
+        }
+
+        String mode = config.getString("Swim Mode").orElse("AUTO");
+
+        if (mode.equalsIgnoreCase("MANUAL")) {
+            horseJumpListener.setJumpMultiplier(config.getNumber("Manual Swim Jump Multiplier").orElse(1.4).doubleValue());
+            pm.registerEvents(horseJumpListener, this);
+            swimListener.setPreventAutoForHorses(true);
+        } else {
+            HandlerList.unregisterAll(horseJumpListener);
+            swimListener.setPreventAutoForHorses(false);
+        }
+
+        pm.registerEvents(swimListener, this);
     }
 }
