@@ -39,7 +39,7 @@ import java.nio.file.Paths;
 import java.util.Map;
 
 public final class HorseSwim extends JavaPlugin {
-    private static final @NotNull ConfigurationHolder config = new ConfigurationHolder(Paths.get("plugins", "HorseSwim"),
+    private static final @NotNull ConfigurationHolder config = new ConfigurationHolder(Paths.get("plugins", "HorseSwim", "config.yml"),
             "# Swim modes: AUTO and MANUAL. MANUAL works only for horses, all other animals swim in AUTO.\n" +
                     "Swim Mode: AUTO\n" +
                     "\n" +
@@ -49,7 +49,10 @@ public final class HorseSwim extends JavaPlugin {
                     "Prevent Auto Underwater Dismount: true\n" +
                     "\n" +
                     "# In manual mode, horses jump force in water is: Power of the jump * Horse max jump strength * This multiplier.\n" +
-                    "Manual Swim Jump Multiplier: 1.4");
+                    "Manual Swim Jump Multiplier: 1.4\n" +
+                    "\n" +
+                    "# The Y velocity to set to the entity when Swim Mode is AUTO.\n" +
+                    "Auto Swim Velocity: 0.2");
     private static final @NotNull ConfigurationLoader loader = new ConfigurationLoader();
     private static final @NotNull Logger logger = new Logger("[HorseSwim] ");
     private static final boolean isEntityMountEventCancellable = Cancellable.class.isAssignableFrom(EntityDismountEvent.class);
@@ -62,6 +65,7 @@ public final class HorseSwim extends JavaPlugin {
     private final @NotNull HorseJumpListener horseJumpListener = new HorseJumpListener();
     private final @NotNull DismountListener dismountListener = new DismountListener();
     private final @NotNull SwimListener swimListener = new SwimListener();
+
     public HorseSwim() {
         instance = this;
         logger.setLogger(getLogger());
@@ -120,6 +124,7 @@ public final class HorseSwim extends JavaPlugin {
             swimListener.setPreventAutoForHorses(false);
         }
 
+        swimListener.setAutoSwimVelocity(config.getNumber("Auto Swim Velocity").orElse(0.2).doubleValue());
         pm.registerEvents(swimListener, this);
     }
 }

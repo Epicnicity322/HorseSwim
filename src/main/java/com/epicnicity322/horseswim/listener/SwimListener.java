@@ -29,9 +29,14 @@ import org.bukkit.event.player.PlayerMoveEvent;
 
 public final class SwimListener implements Listener {
     private boolean preventAutoForHorses = false;
+    private double autoSwimVelocity = 0.2;
 
     public void setPreventAutoForHorses(boolean preventAutoForHorses) {
         this.preventAutoForHorses = preventAutoForHorses;
+    }
+
+    public void setAutoSwimVelocity(double autoSwimVelocity) {
+        this.autoSwimVelocity = autoSwimVelocity;
     }
 
     @EventHandler
@@ -46,7 +51,7 @@ public final class SwimListener implements Listener {
             if (vehicle != null) {
                 if (preventAutoForHorses && vehicle.getType() == EntityType.HORSE) return;
                 if (HorseSwimUtil.inWater(player) && HorseSwimUtil.inWater(vehicle)) {
-                    vehicle.setVelocity(vehicle.getVelocity().setY(0.15));
+                    vehicle.setVelocity(vehicle.getVelocity().setY(autoSwimVelocity));
                 }
             }
         }
