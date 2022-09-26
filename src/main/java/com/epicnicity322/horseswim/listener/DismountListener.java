@@ -18,18 +18,18 @@
 
 package com.epicnicity322.horseswim.listener;
 
-import com.epicnicity322.horseswim.util.HorseSwimUtil;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.spigotmc.event.entity.EntityDismountEvent;
 
 public final class DismountListener implements Listener {
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onEntityDismount(EntityDismountEvent event) {
-        if (event.getEntity() instanceof Player) {
+        if (!event.getDismounted().isDead() && event.getEntity() instanceof Player) {
             Player player = (Player) event.getEntity();
-            if (!player.isSneaking() && HorseSwimUtil.inWater(player)) {
+            if (!player.isSneaking() && player.isInWater()) {
                 event.setCancelled(true);
             }
         }

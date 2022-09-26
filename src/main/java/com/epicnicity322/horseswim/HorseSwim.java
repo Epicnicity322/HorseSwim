@@ -27,13 +27,11 @@ import com.epicnicity322.horseswim.listener.HorseJumpListener;
 import com.epicnicity322.horseswim.listener.SwimListener;
 import com.epicnicity322.yamlhandler.Configuration;
 import org.bukkit.command.PluginCommand;
-import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.spigotmc.event.entity.EntityDismountEvent;
 
 import java.nio.file.Paths;
 import java.util.Map;
@@ -45,17 +43,15 @@ public final class HorseSwim extends JavaPlugin {
                     "\n" +
                     "# Prevents the player from being dismounted automatically when they are under water.\n" +
                     "# Players can still crouch to dismount underwater, this only prevents the vanilla dismount behavior.\n" +
-                    "# Works only in recent versions.\n" +
                     "Prevent Auto Underwater Dismount: true\n" +
                     "\n" +
                     "# In manual mode, horses jump force in water is: Power of the jump * Horse max jump strength * This multiplier.\n" +
                     "Manual Swim Jump Multiplier: 1.4\n" +
                     "\n" +
                     "# The Y velocity to set to the entity when Swim Mode is AUTO.\n" +
-                    "Auto Swim Velocity: 0.2");
+                    "Auto Swim Velocity: 0.15");
     private static final @NotNull ConfigurationLoader loader = new ConfigurationLoader();
     private static final @NotNull Logger logger = new Logger("[HorseSwim] ");
-    private static final boolean isEntityMountEventCancellable = Cancellable.class.isAssignableFrom(EntityDismountEvent.class);
     private static @Nullable HorseSwim instance;
 
     static {
@@ -106,8 +102,7 @@ public final class HorseSwim extends JavaPlugin {
         PluginManager pm = getServer().getPluginManager();
         Configuration config = HorseSwim.config.getConfiguration();
 
-        if (config.getBoolean("Prevent Auto Underwater Dismount").orElse(false)
-                && isEntityMountEventCancellable) {
+        if (config.getBoolean("Prevent Auto Underwater Dismount").orElse(false)) {
             pm.registerEvents(dismountListener, this);
         } else {
             HandlerList.unregisterAll(dismountListener);

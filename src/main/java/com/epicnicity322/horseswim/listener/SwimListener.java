@@ -18,7 +18,6 @@
 
 package com.epicnicity322.horseswim.listener;
 
-import com.epicnicity322.horseswim.util.HorseSwimUtil;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -29,7 +28,7 @@ import org.bukkit.event.player.PlayerMoveEvent;
 
 public final class SwimListener implements Listener {
     private boolean preventAutoForHorses = false;
-    private double autoSwimVelocity = 0.2;
+    private double autoSwimVelocity = 0.15;
 
     public void setPreventAutoForHorses(boolean preventAutoForHorses) {
         this.preventAutoForHorses = preventAutoForHorses;
@@ -39,18 +38,18 @@ public final class SwimListener implements Listener {
         this.autoSwimVelocity = autoSwimVelocity;
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onPlayerMove(PlayerMoveEvent event) {
         Location from = event.getFrom();
         Location to = event.getTo();
 
-        if (to != null && from.getBlockY() != to.getBlockY()) {
+        if (to != null && from.getY() > to.getY()) {
             Player player = event.getPlayer();
             Entity vehicle = player.getVehicle();
 
             if (vehicle != null) {
                 if (preventAutoForHorses && vehicle.getType() == EntityType.HORSE) return;
-                if (HorseSwimUtil.inWater(player) && HorseSwimUtil.inWater(vehicle)) {
+                if (player.isInWater() && vehicle.isInWater()) {
                     vehicle.setVelocity(vehicle.getVelocity().setY(autoSwimVelocity));
                 }
             }

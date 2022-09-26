@@ -18,8 +18,7 @@
 
 package com.epicnicity322.horseswim.listener;
 
-import com.epicnicity322.horseswim.util.HorseSwimUtil;
-import org.bukkit.entity.Horse;
+import org.bukkit.entity.AbstractHorse;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.HorseJumpEvent;
@@ -32,11 +31,12 @@ public final class HorseJumpListener implements Listener {
         this.jumpMultiplier = jumpMultiplier;
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onHorseJump(HorseJumpEvent event) {
-        Horse horse = (Horse) event.getEntity();
-        if (!HorseSwimUtil.inWater(horse)) return;
+        AbstractHorse horse = event.getEntity();
 
-        horse.setVelocity(horse.getVelocity().setY(event.getPower() * horse.getJumpStrength() * jumpMultiplier));
+        if (horse.isInWater()) {
+            horse.setVelocity(horse.getVelocity().setY(event.getPower() * horse.getJumpStrength() * jumpMultiplier));
+        }
     }
 }
